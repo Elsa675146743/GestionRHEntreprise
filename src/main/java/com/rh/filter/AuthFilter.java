@@ -26,8 +26,20 @@ public class AuthFilter implements Filter {
         HttpSession session = req.getSession();
         String uri = req.getRequestURI();
         
-        // Pages accessibles sans connexion
-        if (uri.endsWith("/login") || uri.contains("/css/")) {
+        // Pages et ressources accessibles sans connexion
+        if (uri.endsWith("/login") || 
+            uri.contains("/css/") || 
+            uri.contains("/fonts/") ||
+            uri.contains("/uploads/") ||
+            uri.contains(".css") ||
+            uri.contains(".png") ||
+            uri.contains(".jpg") ||
+            uri.contains(".jpeg") ||
+            uri.contains(".gif") ||
+            uri.contains(".ico") ||
+            uri.contains("material-icons") ||
+            uri.contains("fonts.googleapis.com") ||
+            uri.contains("fonts.gstatic.com")) {
             chain.doFilter(request, response);
             return;
         }
