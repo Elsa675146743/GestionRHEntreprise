@@ -38,9 +38,27 @@ public class DashboardServlet extends HttpServlet {
         checkExpiringContracts();
         
         Utilisateur user = (Utilisateur) session.getAttribute("user");
+        
+        // Charger la photo de l'employé (seulement si elle existe vraiment)
+        String employePhoto = null;
+        if (user.getEmployeId() != null) {
+            Employe employe = employeDAO.read(user.getEmployeId());
+            if (employe != null && employe.getPhotoFilename() != null && !employe.getPhotoFilename().trim().isEmpty()) {
+                // Vérifier aussi que le fichier existe physiquement
+                String uploadPath = getServletContext().getRealPath("") + "/uploads/" + employe.getPhotoFilename();
+                java.io.File photoFile = new java.io.File(uploadPath);
+                if (photoFile.exists()) {
+                    employePhoto = employe.getPhotoFilename();
+                }
+            }
+        }
+        
+        req.setAttribute("employePhoto", employePhoto);
+        
         System.out.println("=== DASHBOARD ===");
         System.out.println("Utilisateur : " + user.getLogin());
         System.out.println("Rôle : " + user.getRole());
+        System.out.println("Photo : " + (employePhoto != null ? employePhoto : "aucune"));
         System.out.println("================");
         
         req.getRequestDispatcher("/WEB-INF/vues/dashboard.jsp").forward(req, resp);
@@ -62,10 +80,9 @@ public class DashboardServlet extends HttpServlet {
         LocalDate alertDate1 = today.plusDays(1);
         
         for (Contrat c : contrats) {
-            if (c.getTypeContrat().equals("CDD") && c.getDateFin() != null) {
+            if (c.getTypeContrat() != null && c.getTypeContrat().equals("CDD") && c.getDateFin() != null) {
                 LocalDate dateFin = c.getDateFin();
                 
-                // Vérifier si le contrat expire dans 30 jours, 7 jours ou 1 jour
                 if (dateFin.equals(alertDate30) || dateFin.equals(alertDate7) || dateFin.equals(alertDate1)) {
                     Employe employe = employeDAO.read(c.getEmployeId());
                     if (employe != null && employe.getTelephone() != null && !employe.getTelephone().isEmpty()) {

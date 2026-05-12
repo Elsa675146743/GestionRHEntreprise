@@ -85,6 +85,23 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
         return null;
     }
 
+    
+    @Override
+    public Utilisateur findByEmployeId(Long employeId) {
+        String sql = "SELECT * FROM utilisateur WHERE employe_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, employeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapUtilisateur(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     private Utilisateur mapUtilisateur(ResultSet rs) throws SQLException {
         Utilisateur u = new Utilisateur();
         u.setId(rs.getLong("id"));

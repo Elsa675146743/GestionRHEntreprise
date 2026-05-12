@@ -22,8 +22,11 @@
         .app-container { margin-top: 64px; display: flex; min-height: calc(100vh - 64px); }
         .sidebar { width: 260px; background: white; border-right: 1px solid #e2e8f0; padding: 24px 0; }
         .user-card { text-align: center; padding: 0 20px 24px 20px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
-        .avatar { width: 72px; height: 72px; background: #0a2540; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; font-weight: 600; color: white; }
-        .user-name { font-weight: 600; font-size: 16px; color: #1a2a3e; }
+        .avatar { width: 72px; height: 72px; background: #0a2540; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; font-weight: 600; color: white; cursor: pointer; transition: transform 0.2s; overflow: hidden; }
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar:hover { transform: scale(1.05); }
+        .user-name { font-weight: 600; font-size: 16px; color: #1a2a3e; text-decoration: none; cursor: pointer; }
+        .user-name:hover { color: #0a2540; text-decoration: underline; }
         .user-role { font-size: 12px; color: #64748b; margin-top: 4px; }
         .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #475569; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; border-left: 3px solid transparent; }
         .menu-item:hover { background: #f8fafc; color: #0a2540; }
@@ -70,8 +73,19 @@
     <div class="app-container">
         <aside class="sidebar">
             <div class="user-card">
-                <div class="avatar">${fn:substring(user.login, 0, 1)}</div>
-                <div class="user-name">${user.login}</div>
+                <a href="employe?action=view&id=${user.employeId}" style="text-decoration: none;">
+                    <c:choose>
+                        <c:when test="${employePhoto != null && employePhoto != ''}">
+                            <div class="avatar">
+                                <img src="uploads/${employePhoto}" class="avatar-img" alt="Photo">
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="avatar">${fn:substring(user.login, 0, 1)}</div>
+                        </c:otherwise>
+                    </c:choose>
+                    <div class="user-name">${user.login}</div>
+                </a>
                 <div class="user-role">
                     <c:choose>
                         <c:when test="${user.role == 'EMPLOYE'}">Employé</c:when>

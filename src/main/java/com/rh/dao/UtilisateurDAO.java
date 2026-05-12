@@ -7,5 +7,6 @@ public interface UtilisateurDAO {
 	void update(Utilisateur utilisateur);
 	void delete(Long id);
 	Utilisateur findByLogin(String login);
+	Utilisateur findByEmployeId(Long employeId);
 
 }

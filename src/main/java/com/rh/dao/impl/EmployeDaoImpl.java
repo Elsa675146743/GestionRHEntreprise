@@ -200,6 +200,21 @@ public class EmployeDaoImpl implements EmployeDao {
         return 0;
     }
 
+    
+    @Override
+    public double getTotalSalaireByDepartement(Long departementId) {
+        String sql = "SELECT COALESCE(SUM(salaire_base), 0) FROM employe WHERE departement_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, departementId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
     // ==================== MAPPER ====================
     
     private Employe mapEmploye(ResultSet rs) throws SQLException {

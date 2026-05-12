@@ -2,13 +2,17 @@ package com.rh.servlet;
 
 import com.rh.dao.EmployeDao;
 import com.rh.dao.DepartementDAO;
+import com.rh.dao.UtilisateurDAO;
 import com.rh.dao.impl.EmployeDaoImpl;
 import com.rh.dao.impl.DepartementDAOImpl;
+import com.rh.dao.impl.UtilisateurDAOImpl;
 import com.rh.model.Employe;
 import com.rh.model.Departement;
+import com.rh.model.Utilisateur;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,8 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 
 public class EmployeServlet extends HttpServlet {
     
+    private static final long serialVersionUID = 1L;
     private EmployeDao employeDAO = new EmployeDaoImpl();
     private DepartementDAO departementDAO = new DepartementDAOImpl();
+    private UtilisateurDAO utilisateurDAO = new UtilisateurDAOImpl();  // AJOUTÉ
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -64,36 +70,27 @@ public class EmployeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         
-        // Récupérer l'action depuis le paramètre du formulaire
-        String action = req.getParameter("action");
+        String queryString = req.getQueryString();
         boolean isMultipart = ServletFileUpload.isMultipartContent(req);
         
         System.out.println("=== DO POST ===");
-        System.out.println("Action: " + action);
-        System.out.println("IsMultipart: " + isMultipart);
+        System.out.println("QueryString: " + queryString);
         
         if (isMultipart) {
-            // Formulaire avec photo
-            if (action != null && action.equals("update")) {
-                System.out.println("Appel de updateEmployeWithPhoto");
+            if (queryString != null && queryString.contains("update")) {
                 updateEmployeWithPhoto(req, resp);
             } else {
-                System.out.println("Appel de saveEmployeWithPhoto");
                 saveEmployeWithPhoto(req, resp);
             }
         } else {
-            // Formulaire sans photo
-            if (action != null && action.equals("update")) {
-                System.out.println("Appel de updateEmploye");
+            String action = req.getParameter("action");
+            if ("update".equals(action)) {
                 updateEmploye(req, resp);
             } else {
-                System.out.println("Appel de saveEmploye");
                 saveEmploye(req, resp);
             }
         }
     }
-    
-    // ==================== LISTE AVEC PAGINATION ====================
     
     private void listEmployes(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -117,8 +114,6 @@ public class EmployeServlet extends HttpServlet {
         
         req.getRequestDispatcher("/WEB-INF/vues/employe/liste.jsp").forward(req, resp);
     }
-    
-    // ==================== RECHERCHE PAR MOT-CLÉ + PAGINATION ====================
     
     private void searchEmployes(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -147,8 +142,6 @@ public class EmployeServlet extends HttpServlet {
         req.getRequestDispatcher("/WEB-INF/vues/employe/liste.jsp").forward(req, resp);
     }
     
-    // ==================== FORMULAIRES ====================
-    
     private void showForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         List<Departement> departements = departementDAO.findAll();
@@ -166,8 +159,6 @@ public class EmployeServlet extends HttpServlet {
         req.getRequestDispatcher("/WEB-INF/vues/employe/form.jsp").forward(req, resp);
     }
     
-    // ==================== VOIR DÉTAILS ====================
-    
     private void viewEmploye(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Long id = Long.parseLong(req.getParameter("id"));
@@ -176,12 +167,29 @@ public class EmployeServlet extends HttpServlet {
         req.getRequestDispatcher("/WEB-INF/vues/employe/view.jsp").forward(req, resp);
     }
     
-    // ==================== CRUD SANS PHOTO ====================
+    // ==================== CRÉATION COMPTE UTILISATEUR ====================
+    
+    private void createUserAccount(Employe employe) {  // AJOUTÉ
+        String prenomClean = employe.getPrenom().toLowerCase().trim().replaceAll("\\s+", "");
+        String nomClean = employe.getNom().toLowerCase().trim().replaceAll("\\s+", "");
+        String login = prenomClean + "." + nomClean;
+        
+        String defaultPassword = "password123";
+        
+        Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setLogin(login);
+        utilisateur.setMdpHash(defaultPassword);  
+        
+        utilisateur.setRole("EMPLOYE");
+        utilisateur.setEmployeId(employe.getId());
+        utilisateur.setActif(true);
+        
+        utilisateurDAO.create(utilisateur);
+        System.out.println("Compte utilisateur créé pour: " + login + " / " + defaultPassword);
+    }
     
     private void saveEmploye(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        System.out.println("=== SAVE EMPLOYE (sans photo) ===");
-        
         String matricule = req.getParameter("matricule");
         String nom = req.getParameter("nom");
         String prenom = req.getParameter("prenom");
@@ -208,14 +216,12 @@ public class EmployeServlet extends HttpServlet {
         e.setSoldeCongesJours(0);
         
         employeDAO.create(e);
-        System.out.println("Employé créé avec ID: " + e.getId());
+        createUserAccount(e);  // AJOUTÉ
         resp.sendRedirect("employe?action=list");
     }
     
     private void updateEmploye(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        System.out.println("=== UPDATE EMPLOYE (sans photo) ===");
-        
         Long id = Long.parseLong(req.getParameter("id"));
         String matricule = req.getParameter("matricule");
         String nom = req.getParameter("nom");
@@ -228,10 +234,6 @@ public class EmployeServlet extends HttpServlet {
         String telephone = req.getParameter("telephone");
         String email = req.getParameter("email");
         
-        System.out.println("ID à modifier: " + id);
-        System.out.println("Nouveau nom: " + nom);
-        
-        // Récupérer l'employé existant pour garder sa photo
         Employe existing = employeDAO.read(id);
         
         Employe e = new Employe();
@@ -250,20 +252,17 @@ public class EmployeServlet extends HttpServlet {
         e.setSoldeCongesJours(existing.getSoldeCongesJours());
         
         employeDAO.update(e);
-        System.out.println("Employé modifié avec succès");
         resp.sendRedirect("employe?action=list");
     }
-    
-    // ==================== CRUD AVEC UPLOAD PHOTO ====================
     
     private void saveEmployeWithPhoto(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
         
-        System.out.println("=== SAVE EMPLOYE AVEC PHOTO ===");
-        
         String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
         File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) uploadDir.mkdir();
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
         
         DiskFileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
@@ -299,7 +298,7 @@ public class EmployeServlet extends HttpServlet {
                             photoFileName = System.currentTimeMillis() + "_" + fileName;
                             String filePath = uploadPath + File.separator + photoFileName;
                             item.write(new File(filePath));
-                            System.out.println("Photo sauvegardée: " + photoFileName);
+                            System.out.println("Photo sauvegardée: " + filePath);
                         }
                     }
                 }
@@ -320,7 +319,7 @@ public class EmployeServlet extends HttpServlet {
             e.setSoldeCongesJours(0);
             
             employeDAO.create(e);
-            System.out.println("Employé créé avec photo");
+            createUserAccount(e);  // AJOUTÉ
             resp.sendRedirect("employe?action=list");
             
         } catch (Exception e) {
@@ -333,17 +332,33 @@ public class EmployeServlet extends HttpServlet {
     private void updateEmployeWithPhoto(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
         
-        System.out.println("=== UPDATE EMPLOYE AVEC PHOTO ===");
+        // Récupérer l'ID depuis l'URL
+        Long id = null;
+        String queryString = req.getQueryString();
+        if (queryString != null && queryString.contains("id=")) {
+            String idStr = queryString.split("id=")[1].split("&")[0];
+            id = Long.parseLong(idStr);
+        }
+        
+        System.out.println("=== updateEmployeWithPhoto ===");
+        System.out.println("ID récupéré depuis URL: " + id);
+        
+        if (id == null) {
+            System.out.println("ERREUR: ID non trouvé dans l'URL");
+            resp.sendRedirect("employe?action=list");
+            return;
+        }
         
         String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
         File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) uploadDir.mkdir();
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
         
         DiskFileItemFactory factory = new DiskFileItemFactory();
         ServletFileUpload upload = new ServletFileUpload(factory);
         upload.setFileSizeMax(1024 * 1024 * 2);
         
-        Long id = null;
         String matricule = "", nom = "", prenom = "", poste = "", typeContrat = "", telephone = "", email = "";
         Long departementId = null;
         LocalDate dateEmbauche = null;
@@ -355,7 +370,6 @@ public class EmployeServlet extends HttpServlet {
             for (FileItem item : items) {
                 if (item.isFormField()) {
                     switch (item.getFieldName()) {
-                        case "id": id = Long.parseLong(item.getString()); break;
                         case "matricule": matricule = item.getString(); break;
                         case "nom": nom = item.getString(); break;
                         case "prenom": prenom = item.getString(); break;
@@ -375,20 +389,24 @@ public class EmployeServlet extends HttpServlet {
                             photoFileName = System.currentTimeMillis() + "_" + fileName;
                             String filePath = uploadPath + File.separator + photoFileName;
                             item.write(new File(filePath));
-                            System.out.println("Nouvelle photo sauvegardée: " + photoFileName);
+                            System.out.println("Nouvelle photo sauvegardée: " + filePath);
                         }
                     }
                 }
             }
             
-            System.out.println("ID à modifier: " + id);
-            System.out.println("Nouveau nom: " + nom);
+            System.out.println("Tentative de mise à jour ID: " + id);
+            System.out.println("Nouveau départementId: " + departementId);
             
-            // Récupérer l'employé existant pour garder l'ancienne photo si pas de nouvelle
             Employe existing = employeDAO.read(id);
+            if (existing == null) {
+                System.out.println("Employé non trouvé avec ID: " + id);
+                resp.sendRedirect("employe?action=list");
+                return;
+            }
+            
             if (photoFileName == null) {
                 photoFileName = existing.getPhotoFilename();
-                System.out.println("Pas de nouvelle photo, on garde l'ancienne: " + photoFileName);
             }
             
             Employe e = new Employe();
@@ -407,12 +425,12 @@ public class EmployeServlet extends HttpServlet {
             e.setSoldeCongesJours(existing.getSoldeCongesJours());
             
             employeDAO.update(e);
-            System.out.println("Employé modifié avec succès");
+            System.out.println("Employé modifié avec succès !");
             resp.sendRedirect("employe?action=list");
             
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "Erreur lors de la mise à jour");
+            req.setAttribute("error", "Erreur lors de la mise à jour: " + e.getMessage());
             showEditForm(req, resp);
         }
     }

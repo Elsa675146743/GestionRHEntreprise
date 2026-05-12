@@ -10,6 +10,7 @@ public interface EmployeDao {
     void delete(Long id);
     List<Employe> findAll();
     List<Employe> findByDepartement(Long departementId);
+    double getTotalSalaireByDepartement(Long departementId);
     List<Employe> searchByKeyword(String keyword, int offset, int limit);
     int countSearch(String keyword);
     
