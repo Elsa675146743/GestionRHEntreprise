@@ -70,6 +70,14 @@ public class ContratServlet extends HttpServlet {
     private void showForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         List<Employe> employes = employeDAO.findAll();
+        
+        // Si un employé est sélectionné, pré-remplir avec ses infos
+        String employeIdParam = req.getParameter("employeId");
+        if (employeIdParam != null) {
+            Employe employe = employeDAO.read(Long.parseLong(employeIdParam));
+            req.setAttribute("prefilledEmploye", employe);
+        }
+        
         req.setAttribute("employes", employes);
         req.getRequestDispatcher("/WEB-INF/vues/contrat/form.jsp").forward(req, resp);
     }
