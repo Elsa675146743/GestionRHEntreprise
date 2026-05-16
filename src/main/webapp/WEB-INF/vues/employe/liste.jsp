@@ -342,7 +342,6 @@
                 <a href="employe?action=add" class="btn btn-primary">➕ Ajouter un employé</a>
                 <a href="${pageContext.request.contextPath}/csv/employes" class="btn btn-secondary">📥 Exporter CSV</a>
                 <a href="${pageContext.request.contextPath}/pdf/employes" class="btn btn-secondary">📄 Exporter PDF</a>
-                <button onclick="openSmsModal()" class="btn btn-outline">📱 Envoyer SMS</button>
             </div>
             
             <div class="search-section">
@@ -424,29 +423,6 @@
         </div>
     </div>
     
-    <!-- Modal SMS -->
-    <div id="smsModal" class="modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:24px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.2); z-index:1000; width:350px;">
-        <h3 style="margin-bottom:16px;">📱 Envoyer un SMS</h3>
-        <form action="${pageContext.request.contextPath}/sms/send" method="post">
-            <label style="display:block; margin-bottom:6px; font-size:13px; font-weight:500;">Numéro :</label>
-            <input type="text" name="phoneNumber" placeholder="Ex: 691234567" required style="width:100%; padding:10px; margin-bottom:16px; border:1px solid #e2e8f0; border-radius:8px;">
-            <label style="display:block; margin-bottom:6px; font-size:13px; font-weight:500;">Message :</label>
-            <textarea name="message" rows="3" placeholder="Votre message..." required style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #e2e8f0; border-radius:8px;"></textarea>
-            <button type="submit" style="background:#0a2540; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">✅ Envoyer</button>
-            <button type="button" onclick="closeSmsModal()" style="background:#e2e8f0; color:#1e293b; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; margin-left:8px;">❌ Annuler</button>
-        </form>
-    </div>
-    <div id="smsOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;"></div>
-    
-    <script>
-        function openSmsModal() {
-            document.getElementById('smsModal').style.display = 'block';
-            document.getElementById('smsOverlay').style.display = 'block';
-        }
-        function closeSmsModal() {
-            document.getElementById('smsModal').style.display = 'none';
-            document.getElementById('smsOverlay').style.display = 'none';
-        }
-    </script>
+   
 </body>
 </html>

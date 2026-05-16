@@ -6,6 +6,7 @@ public interface UtilisateurDAO {
 	Utilisateur read(Long id);
 	void update(Utilisateur utilisateur);
 	void delete(Long id);
+	void updateMotDePasse(Long id, String nouveauHash);
 	Utilisateur findByLogin(String login);
 	Utilisateur findByEmployeId(Long employeId);
 

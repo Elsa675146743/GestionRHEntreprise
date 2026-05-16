@@ -92,7 +92,9 @@ public class EmployeDaoImpl implements EmployeDao {
     @Override
     public List<Employe> findAll() {
         List<Employe> list = new ArrayList<>();
-        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e LEFT JOIN departement d ON e.departement_id = d.id ORDER BY e.nom";
+        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e " +
+                     "LEFT JOIN departement d ON e.departement_id = d.id " +
+                     "ORDER BY e.matricule ASC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -108,7 +110,10 @@ public class EmployeDaoImpl implements EmployeDao {
     @Override
     public List<Employe> findByDepartement(Long departementId) {
         List<Employe> list = new ArrayList<>();
-        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e LEFT JOIN departement d ON e.departement_id = d.id WHERE e.departement_id = ?";
+        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e " +
+                     "LEFT JOIN departement d ON e.departement_id = d.id " +
+                     "WHERE e.departement_id = ? " +
+                     "ORDER BY e.matricule ASC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, departementId);
@@ -126,7 +131,10 @@ public class EmployeDaoImpl implements EmployeDao {
     @Override
     public List<Employe> searchByKeyword(String keyword, int offset, int limit) {
         List<Employe> list = new ArrayList<>();
-        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e LEFT JOIN departement d ON e.departement_id = d.id WHERE e.nom LIKE ? OR e.prenom LIKE ? OR e.matricule LIKE ? LIMIT ? OFFSET ?";
+        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e " +
+                     "LEFT JOIN departement d ON e.departement_id = d.id " +
+                     "WHERE e.nom LIKE ? OR e.prenom LIKE ? OR e.matricule LIKE ? " +
+                     "ORDER BY e.matricule ASC LIMIT ? OFFSET ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             String like = "%" + keyword + "%";
@@ -164,14 +172,12 @@ public class EmployeDaoImpl implements EmployeDao {
         return 0;
     }
 
-    // ==================== MÉTHODES DE PAGINATION ====================
-    
     @Override
     public List<Employe> findAllPaginated(int offset, int recordsPerPage) {
         List<Employe> list = new ArrayList<>();
         String sql = "SELECT e.*, d.nom as departement_nom FROM employe e " +
                      "LEFT JOIN departement d ON e.departement_id = d.id " +
-                     "ORDER BY e.nom LIMIT ? OFFSET ?";
+                     "ORDER BY e.matricule ASC LIMIT ? OFFSET ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, recordsPerPage);
@@ -200,7 +206,6 @@ public class EmployeDaoImpl implements EmployeDao {
         return 0;
     }
 
-    
     @Override
     public double getTotalSalaireByDepartement(Long departementId) {
         String sql = "SELECT COALESCE(SUM(salaire_base), 0) FROM employe WHERE departement_id = ?";
@@ -215,8 +220,29 @@ public class EmployeDaoImpl implements EmployeDao {
         }
         return 0;
     }
-    // ==================== MAPPER ====================
-    
+
+    @Override
+    public List<Employe> findByRole(String role) {
+        List<Employe> list = new ArrayList<>();
+        String sql = "SELECT e.*, d.nom as departement_nom FROM employe e " +
+                     "LEFT JOIN departement d ON e.departement_id = d.id " +
+                     "JOIN utilisateur u ON e.id = u.employe_id " +
+                     "WHERE u.role = ? " +
+                     "ORDER BY e.matricule ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapEmploye(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     private Employe mapEmploye(ResultSet rs) throws SQLException {
         Employe e = new Employe();
         e.setId(rs.getLong("id"));

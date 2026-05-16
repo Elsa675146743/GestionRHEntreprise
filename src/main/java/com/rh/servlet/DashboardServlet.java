@@ -12,8 +12,10 @@ import javax.servlet.http.HttpSession;
 import com.rh.model.Utilisateur;
 import com.rh.dao.ContratDAO;
 import com.rh.dao.EmployeDao;
+import com.rh.dao.MessageDAO;
 import com.rh.dao.impl.ContratDAOImpl;
 import com.rh.dao.impl.EmployeDaoImpl;
+import com.rh.dao.impl.MessageDAOImpl;
 import com.rh.model.Contrat;
 import com.rh.model.Employe;
 import com.rh.util.SmsUtil;
@@ -23,6 +25,7 @@ public class DashboardServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ContratDAO contratDAO = new ContratDAOImpl();
     private EmployeDao employeDAO = new EmployeDaoImpl();
+    private MessageDAO messageDAO = new MessageDAOImpl();
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
@@ -51,6 +54,11 @@ public class DashboardServlet extends HttpServlet {
                     employePhoto = employe.getPhotoFilename();
                 }
             }
+            
+            // ========== CHARGER LE NOMBRE DE MESSAGES NON LUS ==========
+            int nonLus = messageDAO.countNonLus(employe.getId());
+            req.setAttribute("nonLus", nonLus);
+            System.out.println("Messages non lus pour " + user.getLogin() + " : " + nonLus);
         }
         
         req.setAttribute("employePhoto", employePhoto);

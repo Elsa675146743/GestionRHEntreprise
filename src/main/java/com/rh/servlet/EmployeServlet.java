@@ -169,23 +169,30 @@ public class EmployeServlet extends HttpServlet {
     
     // ==================== CRÉATION COMPTE UTILISATEUR ====================
     
-    private void createUserAccount(Employe employe) {  // AJOUTÉ
+    private void createUserAccount(Employe employe) {
         String prenomClean = employe.getPrenom().toLowerCase().trim().replaceAll("\\s+", "");
         String nomClean = employe.getNom().toLowerCase().trim().replaceAll("\\s+", "");
         String login = prenomClean + "." + nomClean;
         
+        Utilisateur existing = utilisateurDAO.findByLogin(login);
+        if (existing != null) {
+            login = employe.getEmail().split("@")[0].toLowerCase().trim().replaceAll("\\s+", "");
+        }
+        
         String defaultPassword = "password123";
+        
+        // Hachage du mot de passe avec BCrypt
+        String hashedPassword = BCrypt.hashpw(defaultPassword, BCrypt.gensalt());
         
         Utilisateur utilisateur = new Utilisateur();
         utilisateur.setLogin(login);
-        utilisateur.setMdpHash(defaultPassword);  
-        
+        utilisateur.setMdpHash(hashedPassword);
         utilisateur.setRole("EMPLOYE");
         utilisateur.setEmployeId(employe.getId());
         utilisateur.setActif(true);
         
         utilisateurDAO.create(utilisateur);
-        System.out.println("Compte utilisateur créé pour: " + login + " / " + defaultPassword);
+        System.out.println("Compte utilisateur créé pour: " + login + " (mot de passe haché)");
     }
     
     private void saveEmploye(HttpServletRequest req, HttpServletResponse resp)

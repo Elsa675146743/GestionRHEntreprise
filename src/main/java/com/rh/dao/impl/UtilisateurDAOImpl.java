@@ -9,7 +9,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
 
     @Override
     public void create(Utilisateur u) {
-        String sql = "INSERT INTO utilisateur (login, mdp_hash, role, employe_id, actif) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO utilisateur (login, mdp_hash, role, employe_id, actif, premier_connexion) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, u.getLogin());
@@ -17,6 +17,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
             ps.setString(3, u.getRole());
             ps.setLong(4, u.getEmployeId());
             ps.setBoolean(5, u.isActif());
+            ps.setBoolean(6, true); // premier_connexion = true par défaut
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) u.setId(rs.getLong(1));
@@ -43,7 +44,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
 
     @Override
     public void update(Utilisateur u) {
-        String sql = "UPDATE utilisateur SET login=?, mdp_hash=?, role=?, employe_id=?, actif=? WHERE id=?";
+        String sql = "UPDATE utilisateur SET login=?, mdp_hash=?, role=?, employe_id=?, actif=?, premier_connexion=? WHERE id=?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, u.getLogin());
@@ -51,7 +52,8 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
             ps.setString(3, u.getRole());
             ps.setLong(4, u.getEmployeId());
             ps.setBoolean(5, u.isActif());
-            ps.setLong(6, u.getId());
+            ps.setBoolean(6, u.isPremierConnexion());
+            ps.setLong(7, u.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -85,7 +87,6 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
         return null;
     }
 
-    
     @Override
     public Utilisateur findByEmployeId(Long employeId) {
         String sql = "SELECT * FROM utilisateur WHERE employe_id = ?";
@@ -93,15 +94,27 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, employeId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapUtilisateur(rs);
-                }
+                if (rs.next()) return mapUtilisateur(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+    @Override
+    public void updateMotDePasse(Long id, String nouveauHash) {
+        String sql = "UPDATE utilisateur SET mdp_hash=?, premier_connexion=0 WHERE id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nouveauHash);
+            ps.setLong(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Utilisateur mapUtilisateur(ResultSet rs) throws SQLException {
         Utilisateur u = new Utilisateur();
         u.setId(rs.getLong("id"));
@@ -111,6 +124,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
         u.setEmployeId(rs.getLong("employe_id"));
         if (rs.getObject("employe_id") == null) u.setEmployeId(null);
         u.setActif(rs.getBoolean("actif"));
+        u.setPremierConnexion(rs.getBoolean("premier_connexion"));
         return u;
     }
 }

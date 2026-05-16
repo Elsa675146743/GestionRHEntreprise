@@ -96,6 +96,11 @@ public class FichePaieServlet extends HttpServlet {
         double salaireBrut = salaireBase + montantHeuresSup + primes;
         double salaireNet = salaireBrut - retenues;
         
+        System.out.println("=== CRÉATION FICHE PAIE ===");
+        System.out.println("Employé ID: " + employeId);
+        System.out.println("Mois: " + mois);
+        System.out.println("Salaire net: " + salaireNet);
+        
         FichePaie f = new FichePaie();
         f.setEmployeId(employeId);
         f.setMois(mois);
@@ -113,7 +118,12 @@ public class FichePaieServlet extends HttpServlet {
         Employe employe = employeDAO.read(employeId);
         if (employe != null && employe.getTelephone() != null && !employe.getTelephone().isEmpty()) {
             String message = "Votre fiche de paie de " + mois + " est disponible. Net : " + String.format("%,.0f", salaireNet) + " FCFA";
+            System.out.println("📱 ENVOI SMS FICHE PAIE");
+            System.out.println("Numéro: " + employe.getTelephone());
+            System.out.println("Message: " + message);
             SmsUtil.sendSms(employe.getTelephone(), message);
+        } else {
+            System.out.println("⚠️ SMS non envoyé: numéro manquant pour l'employé ID " + employeId);
         }
         
         resp.sendRedirect("fichepaie?action=list");

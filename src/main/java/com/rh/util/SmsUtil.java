@@ -3,33 +3,25 @@ package com.rh.util;
 public class SmsUtil {
     
     public static void sendSms(String phoneNumber, String message) {
+        System.out.println("╔════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                         📱 SMS SIMULATION                          ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════════╣");
+        System.out.println("║ Destinataire : " + formatPhoneNumber(phoneNumber));
+        System.out.println("║ Message      : " + message);
+        System.out.println("╚════════════════════════════════════════════════════════════════════╝");
+        System.out.println();
+    }
+    
+    private static String formatPhoneNumber(String phoneNumber) {
         if (phoneNumber == null || phoneNumber.isEmpty()) {
-            System.out.println("SMS non envoyé : numéro de téléphone manquant");
-            return;
+            return "non renseigné";
         }
-        
-        System.out.println("=== ENVOI SMS ===");
-        System.out.println("Numéro : " + phoneNumber);
-        System.out.println("Message : " + message);
-        System.out.println("================");
-        
-        // Pour une vraie intégration, décommentez et adaptez ce code
-        /*
-        try {
-            String encodedMessage = URLEncoder.encode(message, "UTF-8");
-            String urlString = API_URL + "?api_key=" + API_KEY + "&to=" + phoneNumber + "&message=" + encodedMessage;
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                System.out.println("SMS envoyé avec succès");
-            } else {
-                System.out.println("Erreur lors de l'envoi SMS");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        phoneNumber = phoneNumber.trim().replaceAll("\\s+", "");
+        if (phoneNumber.startsWith("0")) {
+            return "+237" + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith("+")) {
+            return "+237" + phoneNumber;
         }
-        */
+        return phoneNumber;
     }
 }

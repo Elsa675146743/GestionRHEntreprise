@@ -31,6 +31,15 @@
         .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #475569; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; border-left: 3px solid transparent; }
         .menu-item:hover { background: #f8fafc; color: #0a2540; }
         .menu-item.active { background: #eef2ff; color: #0a2540; border-left-color: #0a2540; }
+        .notification-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
         .main-content { flex: 1; padding: 28px 32px; }
         .welcome-banner { background: linear-gradient(135deg, #0a2540 0%, #1e3a5f 100%); border-radius: 16px; padding: 28px 32px; color: white; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
         .welcome-text h2 { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
@@ -99,6 +108,12 @@
                     <a href="dashboard" class="menu-item active">📊 Tableau de bord</a>
                     <a href="fichepaie?action=list" class="menu-item">💰 Ma fiche de paie</a>
                     <a href="conge?action=list" class="menu-item">🏖️ Mes congés</a>
+                    <a href="message?action=list" class="menu-item">
+                        💬 Messages
+                        <c:if test="${nonLus > 0}">
+                            <span class="notification-badge">${nonLus}</span>
+                        </c:if>
+                    </a>
                 </c:if>
                 <c:if test="${user.role == 'RH'}">
                     <a href="dashboard" class="menu-item active">📊 Tableau de bord</a>
@@ -107,6 +122,12 @@
                     <a href="contrat?action=list" class="menu-item">📄 Contrats</a>
                     <a href="conge?action=list" class="menu-item">🏖️ Congés</a>
                     <a href="fichepaie?action=list" class="menu-item">💰 Fiches de paie</a>
+                    <a href="message?action=list" class="menu-item">
+                        💬 Messages
+                        <c:if test="${nonLus > 0}">
+                            <span class="notification-badge">${nonLus}</span>
+                        </c:if>
+                    </a>
                 </c:if>
                 <c:if test="${user.role == 'DIRECTEUR'}">
                     <a href="dashboard" class="menu-item active">📊 Tableau de bord</a>
@@ -116,6 +137,12 @@
                     <a href="conge?action=list" class="menu-item">🏖️ Congés</a>
                     <a href="fichepaie?action=list" class="menu-item">💰 Fiches de paie</a>
                     <a href="statistiques" class="menu-item">📈 Statistiques</a>
+                    <a href="message?action=list" class="menu-item">
+                        💬 Messages
+                        <c:if test="${nonLus > 0}">
+                            <span class="notification-badge">${nonLus}</span>
+                        </c:if>
+                    </a>
                 </c:if>
             </nav>
         </aside>

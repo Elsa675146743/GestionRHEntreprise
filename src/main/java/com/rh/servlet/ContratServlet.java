@@ -71,7 +71,6 @@ public class ContratServlet extends HttpServlet {
             throws ServletException, IOException {
         List<Employe> employes = employeDAO.findAll();
         
-        // Si un employé est sélectionné, pré-remplir avec ses infos
         String employeIdParam = req.getParameter("employeId");
         if (employeIdParam != null) {
             Employe employe = employeDAO.read(Long.parseLong(employeIdParam));
@@ -101,6 +100,11 @@ public class ContratServlet extends HttpServlet {
         LocalDate dateFin = dateFinStr != null && !dateFinStr.isEmpty() ? LocalDate.parse(dateFinStr) : null;
         double salaire = Double.parseDouble(req.getParameter("salaire"));
         String avantages = req.getParameter("avantages");
+        
+        System.out.println("=== CRÉATION CONTRAT ===");
+        System.out.println("Employé ID: " + employeId);
+        System.out.println("Type: " + typeContrat);
+        System.out.println("Date fin: " + dateFin);
         
         Contrat c = new Contrat();
         c.setEmployeId(employeId);
@@ -142,7 +146,6 @@ public class ContratServlet extends HttpServlet {
         
         contratDAO.update(c);
         
-        // ALERTE SMS : Contrat CDD qui expire bientôt
         if (typeContrat.equals("CDD") && dateFin != null) {
             checkAndSendExpirationAlert(c);
         }
@@ -167,15 +170,27 @@ public class ContratServlet extends HttpServlet {
         
         LocalDate dateFin = contrat.getDateFin();
         
-        // Vérifier si le contrat expire dans 30 jours, 7 jours ou 1 jour
+        System.out.println("=== VÉRIFICATION EXPIRATION CDD ===");
+        System.out.println("Aujourd'hui: " + today);
+        System.out.println("Date fin contrat: " + dateFin);
+        System.out.println("Alerte 30 jours: " + alertDate30);
+        System.out.println("Alerte 7 jours: " + alertDate7);
+        System.out.println("Alerte 1 jour: " + alertDate1);
+        
         if (dateFin.equals(alertDate30) || dateFin.equals(alertDate7) || dateFin.equals(alertDate1)) {
             Employe employe = employeDAO.read(contrat.getEmployeId());
             if (employe != null && employe.getTelephone() != null && !employe.getTelephone().isEmpty()) {
                 String message = "Contrat de " + employe.getNom() + " " + employe.getPrenom() + 
                                  " expire le " + dateFin + ". Action requise";
+                System.out.println("📱 ENVOI SMS ALERTE EXPIRATION");
+                System.out.println("Numéro: " + employe.getTelephone());
+                System.out.println("Message: " + message);
                 SmsUtil.sendSms(employe.getTelephone(), message);
-                System.out.println("Alerte expiration envoyée pour le contrat de " + employe.getNom());
+            } else {
+                System.out.println("⚠️ SMS non envoyé: numéro manquant pour " + employe.getNom());
             }
+        } else {
+            System.out.println("✅ Aucune alerte à envoyer pour ce contrat");
         }
     }
 }

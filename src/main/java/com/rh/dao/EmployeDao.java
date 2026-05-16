@@ -17,4 +17,5 @@ public interface EmployeDao {
     // Méthodes pour la pagination
     List<Employe> findAllPaginated(int offset, int recordsPerPage);
     int countAll();
+    List<Employe> findByRole(String role);
 }

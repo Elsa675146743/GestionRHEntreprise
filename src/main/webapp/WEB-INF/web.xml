@@ -7,15 +7,7 @@
     
     <display-name>Gestion RH Entreprise</display-name>
     
-    <servlet>
-        <servlet-name>ListeDepartementServlet</servlet-name>
-        <servlet-class>com.rh.servlet.ListeDepartementServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ListeDepartementServlet</servlet-name>
-        <url-pattern>/departement/liste</url-pattern>
-    </servlet-mapping>
-
+    <!-- Servlets principales -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>com.rh.servlet.LoginServlet</servlet-class>
@@ -43,6 +35,16 @@
         <url-pattern>/dashboard</url-pattern>
     </servlet-mapping>
 
+    <!-- Gestion des départements -->
+    <servlet>
+        <servlet-name>ListeDepartementServlet</servlet-name>
+        <servlet-class>com.rh.servlet.ListeDepartementServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ListeDepartementServlet</servlet-name>
+        <url-pattern>/departement/liste</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>DepartementServlet</servlet-name>
         <servlet-class>com.rh.servlet.DepartementServlet</servlet-class>
@@ -52,6 +54,7 @@
         <url-pattern>/departement</url-pattern>
     </servlet-mapping>
 
+    <!-- Gestion des employés -->
     <servlet>
         <servlet-name>EmployeServlet</servlet-name>
         <servlet-class>com.rh.servlet.EmployeServlet</servlet-class>
@@ -61,6 +64,7 @@
         <url-pattern>/employe</url-pattern>
     </servlet-mapping>
 
+    <!-- Gestion des contrats -->
     <servlet>
         <servlet-name>ContratServlet</servlet-name>
         <servlet-class>com.rh.servlet.ContratServlet</servlet-class>
@@ -70,6 +74,7 @@
         <url-pattern>/contrat</url-pattern>
     </servlet-mapping>
 
+    <!-- Gestion des congés -->
     <servlet>
         <servlet-name>CongeServlet</servlet-name>
         <servlet-class>com.rh.servlet.CongeServlet</servlet-class>
@@ -79,6 +84,7 @@
         <url-pattern>/conge</url-pattern>
     </servlet-mapping>
 
+    <!-- Gestion des fiches de paie -->
     <servlet>
         <servlet-name>FichePaieServlet</servlet-name>
         <servlet-class>com.rh.servlet.FichePaieServlet</servlet-class>
@@ -88,6 +94,7 @@
         <url-pattern>/fichepaie</url-pattern>
     </servlet-mapping>
 
+    <!-- Statistiques -->
     <servlet>
         <servlet-name>StatistiquesServlet</servlet-name>
         <servlet-class>com.rh.servlet.StatistiquesServlet</servlet-class>
@@ -97,6 +104,7 @@
         <url-pattern>/statistiques</url-pattern>
     </servlet-mapping>
 
+    <!-- Exports -->
     <servlet>
         <servlet-name>CSVServlet</servlet-name>
         <servlet-class>com.rh.servlet.CSVServlet</servlet-class>
@@ -143,6 +151,7 @@
         <url-pattern>/pdf/rapport</url-pattern>
     </servlet-mapping>
 
+    <!-- SMS -->
     <servlet>
         <servlet-name>SmsServlet</servlet-name>
         <servlet-class>com.rh.servlet.SmsServlet</servlet-class>
@@ -150,6 +159,16 @@
     <servlet-mapping>
         <servlet-name>SmsServlet</servlet-name>
         <url-pattern>/sms/send</url-pattern>
+    </servlet-mapping>
+
+    <!-- Messagerie -->
+    <servlet>
+        <servlet-name>MessageServlet</servlet-name>
+        <servlet-class>com.rh.servlet.MessageServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MessageServlet</servlet-name>
+        <url-pattern>/message</url-pattern>
     </servlet-mapping>
 
     <!-- Pages d'erreur -->
@@ -161,6 +180,15 @@
         <error-code>500</error-code>
         <location>/WEB-INF/vues/error/500.jsp</location>
     </error-page>
+    
+    <servlet>
+    <servlet-name>ChangerMotDePasseServlet</servlet-name>
+    <servlet-class>com.rh.servlet.ChangerMotDePasseServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>ChangerMotDePasseServlet</servlet-name>
+    <url-pattern>/changerMotDePasse</url-pattern>
+</servlet-mapping>
 
     <!-- Filtre d'autorisation -->
     <filter>

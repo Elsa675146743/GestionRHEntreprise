@@ -276,8 +276,8 @@
                     </div>
                     
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
-                        <a href="fichepaie?action=list" class="btn btn-secondary">❌ Annuler</a>
+                        <button type="submit" class="btn btn-primary"> Enregistrer</button>
+                        <a href="fichepaie?action=list" class="btn btn-secondary"> Annuler</a>
                     </div>
                 </form>
             </div>
