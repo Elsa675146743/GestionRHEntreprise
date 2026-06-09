@@ -217,7 +217,6 @@
                     <div class="error-message">❌ ${error}</div>
                 </c:if>
                 
-                <!-- L'action et l'id sont dans l'URL -->
                 <c:choose>
                     <c:when test="${employe != null}">
                         <form action="employe?action=update&id=${employe.id}" method="post" enctype="multipart/form-data">
@@ -242,19 +241,26 @@
                             <label>👤 Prénom</label>
                             <input type="text" name="prenom" value="${employe.prenom}" required>
                         </div>
-                        
-                        <div class="form-group">
-                            <label>💼 Poste</label>
-                            <input type="text" name="poste" value="${employe.poste}" required>
-                        </div>
-                        
+
+                        <!-- DÉPARTEMENT - onchange ajouté -->
                         <div class="form-group">
                             <label>🏢 Département</label>
-                            <select name="departementId" required>
+                            <select name="departementId" id="departementSelect" required onchange="chargerPostes(this.value)">
                                 <option value="">Sélectionner</option>
                                 <c:forEach var="d" items="${departements}">
                                     <option value="${d.id}" ${employe.departementId == d.id ? 'selected' : ''}>${d.nom}</option>
                                 </c:forEach>
+                            </select>
+                        </div>
+
+                        <!-- POSTE - changé en select -->
+                        <div class="form-group">
+                            <label>💼 Poste</label>
+                            <select name="poste" id="posteSelect" required>
+                                <option value="">Sélectionner d'abord un département</option>
+                                <c:if test="${employe != null}">
+                                    <option value="${employe.poste}" selected>${employe.poste}</option>
+                                </c:if>
                             </select>
                         </div>
                         
@@ -318,4 +324,47 @@
             </div>
         </div>
     </div>
+
+    <script>
+        window.onload = function() {
+            const select = document.getElementById('departementSelect');
+            const posteActuel = '${employe.poste}';
+            if (select.value) {
+                chargerPostes(select.value, posteActuel);
+            }
+        };
+
+        function chargerPostes(departementId, posteActuel) {
+            const posteSelect = document.getElementById('posteSelect');
+            posteSelect.innerHTML = '<option value="">Chargement...</option>';
+
+            if (!departementId) {
+                posteSelect.innerHTML = '<option value="">Sélectionner d\'abord un département</option>';
+                return;
+            }
+
+            fetch('departement?action=postes&departementId=' + departementId)
+                .then(response => response.json())
+                .then(postes => {
+                    posteSelect.innerHTML = '<option value="">Sélectionner un poste</option>';
+                    if (postes.length === 0) {
+                        posteSelect.innerHTML = '<option value="">Aucun poste disponible</option>';
+                    } else {
+                        postes.forEach(p => {
+                            const option = document.createElement('option');
+                            option.value = p.titre;
+                            option.textContent = p.titre;
+                            if (posteActuel && p.titre === posteActuel) {
+                                option.selected = true;
+                            }
+                            posteSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(() => {
+                    posteSelect.innerHTML = '<option value="">Erreur de chargement</option>';
+                });
+        }
+    </script>
 </body>
+</html>
